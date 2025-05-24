@@ -43,7 +43,7 @@ php artisan vendor:publish --tag="gitomo-config"
 ## Prerequisites
 
 - PHP 8.3+
-- Laravel 10.0+ or 11.0+ or 12.0+
+- Laravel 11.0+ or 12.0+
 - OpenAI API key with sufficient credits
 
 ## Usage
