@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace Gitomo\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class GitomoCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'gitomo';
 
     public $description = 'My command';
 
