@@ -42,6 +42,11 @@ class GitomoCommand extends Command
             render('<div class="text-green font-bold mt-1">✨ Generated commit message:</div>');
             render('<div class="bg-gray text-white p-1 mt-1">'.$commitMessage.'</div>');
 
+            // Copy to clipboard
+            if ($this->copyToClipboard($commitMessage)) {
+                render('<div class="text-green mt-1">📋 Copied to clipboard!</div>');
+            }
+
             if ($type === 'unstaged') {
                 render('<div class="text-yellow mt-1">💡 Note: These are unstaged changes. Stage them with git add before committing.</div>');
             }
@@ -157,5 +162,39 @@ class GitomoCommand extends Command
         $commitMessage = trim($result->choices[0]->message->content ?? '');
 
         return $commitMessage;
+    }
+
+    private function copyToClipboard(string $text): bool
+    {
+        // Detect operating system and use appropriate clipboard command
+        $os = PHP_OS_FAMILY;
+
+        try {
+            switch ($os) {
+                case 'Darwin': // macOS
+                    $process = Process::input($text)->run('pbcopy');
+                    break;
+
+                case 'Linux':
+                    // Try xclip first, then xsel as fallback
+                    $process = Process::input($text)->run(['xclip', '-selection', 'clipboard']);
+
+                    if (! $process->successful()) {
+                        $process = Process::input($text)->run(['xsel', '--clipboard', '--input']);
+                    }
+                    break;
+
+                case 'Windows':
+                    $process = Process::input($text)->run('clip');
+                    break;
+
+                default:
+                    return false;
+            }
+
+            return $process->successful();
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 }
