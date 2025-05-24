@@ -1,59 +1,107 @@
-# This is my package gitomo
+# Gitomo - AI-Generated Git Commit Messages
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/jesse-bos/gitomo.svg?style=flat-square)](https://packagist.org/packages/jesse-bos/gitomo)
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/jesse-bos/gitomo/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/jesse-bos/gitomo/actions?query=workflow%3Arun-tests+branch%3Amain)
 [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/jesse-bos/gitomo/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/jesse-bos/gitomo/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/jesse-bos/gitomo.svg?style=flat-square)](https://packagist.org/packages/jesse-bos/gitomo)
 
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
-
-## Support us
-
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/gitomo.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/gitomo)
-
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
-
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
+Gitomo is a simple Laravel package that generates commit messages using OpenAI based on your staged git changes. Just run one command and get a suggested commit message!
 
 ## Installation
 
-You can install the package via composer:
+### Step 1: Install Gitomo
 
 ```bash
 composer require jesse-bos/gitomo
 ```
 
-You can publish and run the migrations with:
+*This automatically installs the required OpenAI Laravel package as well.*
+
+### Step 2: Publish OpenAI Configuration
 
 ```bash
-php artisan vendor:publish --tag="gitomo-migrations"
-php artisan migrate
+php artisan vendor:publish --provider="OpenAI\Laravel\ServiceProvider"
 ```
 
-You can publish the config file with:
+### Step 3: Add your OpenAI API Key
+
+1. Get an API key from [OpenAI's website](https://platform.openai.com/api-keys)
+2. Add it to your `.env` file:
+
+```env
+OPENAI_API_KEY=sk-your-actual-api-key-here
+```
+
+### Step 4: Optionally configure Gitomo
+
+If you want to customize the OpenAI model, publish Gitomo's config:
 
 ```bash
 php artisan vendor:publish --tag="gitomo-config"
 ```
 
-This is the contents of the published config file:
+## Prerequisites
 
-```php
-return [
-];
-```
-
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag="gitomo-views"
-```
+- PHP 8.3+
+- Laravel 10.0+ or 11.0+ or 12.0+
+- OpenAI API key with sufficient credits
 
 ## Usage
 
+### Verify your setup (recommended first time)
+
+After installation, verify that everything is configured correctly:
+
+```bash
+php artisan gitomo --check
+```
+
+This will check:
+- ✓ OpenAI API key is set
+- ✓ OpenAI configuration is published  
+- ✓ You're in a git repository
+- ✓ Model configuration
+
+### Generate commit messages
+
+After making changes in your git repository, simply run:
+
+```bash
+php artisan gitomo
+```
+
+Gitomo will automatically:
+1. **First check for staged changes** (files added with `git add` or staged via Tower, GitHub Desktop, etc.)
+2. **If no staged changes found**, it will analyze unstaged changes
+3. **Generate a commit message** based on the found changes
+
+The tool works seamlessly with any git workflow:
+- **Command line**: `git add .` then `php artisan gitomo`
+- **Tower/GitHub Desktop**: Stage files in the GUI, then run `php artisan gitomo`
+- **Quick preview**: Just run `php artisan gitomo` to see a message for unstaged changes
+
+After getting the suggested message, create your commit:
+
+```bash
+git commit -m "the suggested message"
+```
+
+## Configuration
+
+You can configure which OpenAI model to use by setting an environment variable:
+
+```
+GITOMO_OPENAI_MODEL=gpt-4o
+```
+
+Or by publishing and editing the config file:
+
 ```php
-$gitomo = new Gitomo();
-echo $gitomo->echoPhrase('Hello, JesseBos!');
+return [
+    'openai' => [
+        'model' => env('GITOMO_OPENAI_MODEL', 'gpt-4o-mini'),
+    ],
+];
 ```
 
 ## Testing
@@ -61,18 +109,6 @@ echo $gitomo->echoPhrase('Hello, JesseBos!');
 ```bash
 composer test
 ```
-
-## Changelog
-
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
-
-## Contributing
-
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
-
-## Security Vulnerabilities
-
-Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
 
 ## Credits
 
