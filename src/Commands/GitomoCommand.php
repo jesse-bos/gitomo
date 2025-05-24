@@ -8,14 +8,15 @@ use OpenAI\Laravel\Facades\OpenAI;
 
 class GitomoCommand extends Command
 {
-    public $signature = 'gitomo {--check : Check if Gitomo is properly configured}';
+    public $signature = 'gitomo';
 
     public $description = 'Generate an AI-generated commit message based on staged changes';
 
     public function handle(): int
     {
-        if ($this->option('check')) {
-            return $this->checkConfiguration();
+        // Always run a quick config check first
+        if (! $this->configCheck()) {
+            return self::FAILURE;
         }
 
         // Check if we're in a git repository
@@ -57,56 +58,31 @@ class GitomoCommand extends Command
         }
     }
 
-    protected function checkConfiguration(): int
+    protected function configCheck(): bool
     {
-        $this->info('Checking Gitomo configuration...');
-        $this->line('');
-
-        $allGood = true;
+        $hasErrors = false;
 
         // Check OpenAI API key
         $apiKey = config('openai.api_key');
-        if ($apiKey) {
-            $this->info('✓ OpenAI API key found');
-        } else {
-            $this->error('✗ OpenAI API key not found in .env file');
-            $this->line('  Add OPENAI_API_KEY=sk-your-key to your .env file');
-            $allGood = false;
+
+        if (! $apiKey) {
+            $this->error('✗ OpenAI API key not found. Add OPENAI_API_KEY=sk-your-key to your .env file');
+            $hasErrors = true;
         }
 
         // Check if OpenAI config exists
-        if (config('openai')) {
-            $this->info('✓ OpenAI configuration found');
-        } else {
-            $this->error('✗ OpenAI configuration not found');
-            $this->line('  Run: php artisan vendor:publish --provider="OpenAI\Laravel\ServiceProvider"');
-            $allGood = false;
+        if (! config('openai')) {
+            $this->error('✗ OpenAI configuration not found. Run: php artisan vendor:publish --provider="OpenAI\Laravel\ServiceProvider"');
+            $hasErrors = true;
         }
 
         // Check git repository
-        if ($this->isGitRepository()) {
-            $this->info('✓ Git repository detected');
-        } else {
+        if (! $this->isGitRepository()) {
             $this->error('✗ Not in a git repository');
-            $allGood = false;
+            $hasErrors = true;
         }
 
-        // Check model configuration
-        $model = config('gitomo.openai.model', 'gpt-4o-mini');
-        $this->info("✓ Using model: {$model}");
-
-        $this->line('');
-
-        if ($allGood) {
-            $this->info('🎉 Gitomo is properly configured and ready to use!');
-            $this->line('Run "php artisan gitomo" to generate a commit message.');
-
-            return self::SUCCESS;
-        } else {
-            $this->error('❌ Gitomo configuration incomplete. Please fix the issues above.');
-
-            return self::FAILURE;
-        }
+        return ! $hasErrors;
     }
 
     protected function isGitRepository(): bool
@@ -165,14 +141,14 @@ class GitomoCommand extends Command
             $prompt .= "following the Conventional Commits format (e.g., 'feat: add new feature' or 'fix: resolve issue') ";
         }
 
-        $prompt .= "based on these changes. Keep it under {$maxLength} characters.";
+        $prompt .= "based on these changes. Keep it under {$maxLength} characters. Return only the commit message, no markdown formatting.";
         $prompt .= "\n\nChanged files:\n$filesSummary\n\nDiff:\n$diff";
 
         // Request the completion from OpenAI
         $result = OpenAI::chat()->create([
             'model' => config('gitomo.openai.model', 'gpt-4o-mini'),
             'messages' => [
-                ['role' => 'system', 'content' => 'You are a helpful assistant that generates concise, meaningful git commit messages based on code changes.'],
+                ['role' => 'system', 'content' => 'You are a helpful assistant that generates concise, meaningful git commit messages based on code changes. Return only the commit message without any markdown formatting or code blocks.'],
                 ['role' => 'user', 'content' => $prompt],
             ],
             'temperature' => 0.7,
