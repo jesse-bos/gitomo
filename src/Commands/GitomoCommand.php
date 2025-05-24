@@ -3,6 +3,7 @@
 namespace Gitomo\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Process;
 use OpenAI\Laravel\Facades\OpenAI;
 
@@ -26,26 +27,28 @@ class GitomoCommand extends Command
             return self::FAILURE;
         }
 
-        // Try to get staged changes first, then unstaged changes
         $diff = $this->getDiff();
+        $content = Arr::get($diff, 'content');
+        $files = Arr::get($diff, 'files');
+        $type = Arr::get($diff, 'type');
 
-        if (empty($diff['content'])) {
+        if (! $content) {
             $this->error('No changes found. Make some changes to your files first.');
 
             return self::FAILURE;
         }
 
-        $this->info("Analyzing {$diff['type']} changes...");
+        $this->info("Analyzing {$type} changes...");
 
         // Generate and display commit message
         try {
-            $commitMessage = $this->generateCommitMessage($diff['content'], $diff['files']);
+            $commitMessage = $this->generateCommitMessage($content, $files);
 
             $this->info('Generated commit message:');
             $this->line('');
             $this->line($commitMessage);
 
-            if ($diff['type'] === 'unstaged') {
+            if ($type === 'unstaged') {
                 $this->line('');
                 $this->comment('Note: These are unstaged changes. Stage them with git add before committing.');
             }
@@ -58,7 +61,9 @@ class GitomoCommand extends Command
         }
     }
 
-    protected function configCheck(): bool
+    /* -------------------- Helper methods -------------------- */
+
+    private function configCheck(): bool
     {
         $hasErrors = false;
 
@@ -85,7 +90,7 @@ class GitomoCommand extends Command
         return ! $hasErrors;
     }
 
-    protected function isGitRepository(): bool
+    private function isGitRepository(): bool
     {
         $result = Process::run('git rev-parse --is-inside-work-tree');
 
@@ -95,10 +100,11 @@ class GitomoCommand extends Command
     /**
      * @return array<string, string>
      */
-    protected function getDiff(): array
+    private function getDiff(): array
     {
         // First try staged changes
         $stagedProcess = Process::run('git diff --staged');
+
         if ($stagedProcess->successful() && ! empty(trim($stagedProcess->output()))) {
             $filesProcess = Process::run('git diff --staged --name-status');
 
@@ -129,7 +135,7 @@ class GitomoCommand extends Command
         ];
     }
 
-    protected function generateCommitMessage(string $diff, string $filesSummary): string
+    private function generateCommitMessage(string $diff, string $filesSummary): string
     {
         $conventional = config('gitomo.commit.conventional', true);
         $maxLength = config('gitomo.commit.max_length', 72);
