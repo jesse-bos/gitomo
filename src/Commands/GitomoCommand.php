@@ -67,17 +67,14 @@ class GitomoCommand extends Command
     {
         $hasErrors = false;
 
-        // Check OpenAI API key
-        $apiKey = config('openai.api_key');
-
-        if (! $apiKey) {
-            $this->error('✗ OpenAI API key not found. Add OPENAI_API_KEY=sk-your-key to your .env file');
-            $hasErrors = true;
-        }
-
         // Check if OpenAI config exists
         if (! config('openai')) {
             $this->error('✗ OpenAI configuration not found. Run: php artisan vendor:publish --provider="OpenAI\Laravel\ServiceProvider"');
+            $hasErrors = true;
+        }
+
+        if (! config('openai.api_key')) {
+            $this->error('✗ OpenAI API key not found. Add OPENAI_API_KEY=sk-your-key to your .env file');
             $hasErrors = true;
         }
 
