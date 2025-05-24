@@ -1,11 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gitomo\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Process;
 use OpenAI\Laravel\Facades\OpenAI;
+
+use function Termwind\render;
 
 class GitomoCommand extends Command
 {
@@ -24,29 +28,28 @@ class GitomoCommand extends Command
         $type = Arr::get($diff, 'type');
 
         if (! $content = Arr::get($diff, 'content')) {
-            $this->error('No changes found. Make some changes to your files first.');
+            render('<div class="text-yellow">⚠ No changes found. Make some changes to your files first.</div>');
 
             return self::FAILURE;
         }
 
-        $this->info("Analyzing {$type} changes...");
+        render('<div class="text-blue">🔍 Analyzing <span class="font-bold">'.$type.'</span> changes...</div>');
 
         // Generate and display commit message
         try {
             $commitMessage = $this->generateCommitMessage($content, Arr::get($diff, 'files'));
 
-            $this->info('Generated commit message:');
-            $this->line('');
-            $this->line($commitMessage);
+            render('<div class="text-green font-bold mt-1">✨ Generated commit message:</div>');
+            render('<div class="bg-gray text-white p-1 mt-1">'.$commitMessage.'</div>');
 
             if ($type === 'unstaged') {
-                $this->line('');
-                $this->comment('Note: These are unstaged changes. Stage them with git add before committing.');
+                render('<div class="text-yellow mt-1">💡 Note: These are unstaged changes. Stage them with git add before committing.</div>');
             }
 
             return self::SUCCESS;
         } catch (\Exception $e) {
-            $this->error('Failed to generate commit message: '.$e->getMessage());
+            render('<div class="text-red font-bold">❌ Failed to generate commit message:</div>');
+            render('<div class="text-red ml-2">'.$e->getMessage().'</div>');
 
             return self::FAILURE;
         }
@@ -54,24 +57,26 @@ class GitomoCommand extends Command
 
     /* -------------------- Helper methods -------------------- */
 
-    private function configCheck(): bool
+    protected function configCheck(): bool
     {
         $hasErrors = false;
 
         // Check if OpenAI config exists
         if (! config('openai')) {
-            $this->error('✗ OpenAI configuration not found. Run: php artisan vendor:publish --provider="OpenAI\Laravel\ServiceProvider"');
+            render('<div class="text-red font-bold">✗ OpenAI configuration not found</div>');
+            render('<div class="text-gray ml-2">Run: php artisan vendor:publish --provider="OpenAI\Laravel\ServiceProvider"</div>');
             $hasErrors = true;
         }
 
         if (! config('openai.api_key')) {
-            $this->error('✗ OpenAI API key not found. Add OPENAI_API_KEY=sk-your-key to your .env file');
+            render('<div class="text-red font-bold">✗ OpenAI API key not found</div>');
+            render('<div class="text-gray ml-2">Add OPENAI_API_KEY=sk-your-key to your .env file</div>');
             $hasErrors = true;
         }
 
         // Check git repository
         if (! $this->isGitRepository()) {
-            $this->error('✗ Not in a git repository');
+            render('<div class="text-red font-bold">✗ Not in a git repository</div>');
             $hasErrors = true;
         }
 
