@@ -63,10 +63,7 @@
         "laravel": {
             "providers": [
                 "Gitomo\\GitomoServiceProvider"
-            ],
-            "aliases": {
-                "Gitomo": "Gitomo\\Facades\\Gitomo"
-            }
+            ]
         }
     },
     "minimum-stability": "dev",
