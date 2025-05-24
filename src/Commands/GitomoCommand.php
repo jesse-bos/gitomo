@@ -40,7 +40,7 @@ class GitomoCommand extends Command
             $commitMessage = $this->generateCommitMessage($content, Arr::get($diff, 'files'));
 
             render('<div class="text-green font-bold mt-1">✨ Generated commit message:</div>');
-            render('<div class="bg-gray text-white p-1 mt-1">'.$commitMessage.'</div>');
+            render('<div class="bg-green text-white p-1 mt-1">'.$commitMessage.'</div>');
 
             // Copy to clipboard
             if ($this->copyToClipboard($commitMessage)) {
