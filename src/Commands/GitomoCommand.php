@@ -20,19 +20,10 @@ class GitomoCommand extends Command
             return self::FAILURE;
         }
 
-        // Check if we're in a git repository
-        if (! $this->isGitRepository()) {
-            $this->error('Not a git repository!');
-
-            return self::FAILURE;
-        }
-
         $diff = $this->getDiff();
-        $content = Arr::get($diff, 'content');
-        $files = Arr::get($diff, 'files');
         $type = Arr::get($diff, 'type');
 
-        if (! $content) {
+        if (! $content = Arr::get($diff, 'content')) {
             $this->error('No changes found. Make some changes to your files first.');
 
             return self::FAILURE;
@@ -42,7 +33,7 @@ class GitomoCommand extends Command
 
         // Generate and display commit message
         try {
-            $commitMessage = $this->generateCommitMessage($content, $files);
+            $commitMessage = $this->generateCommitMessage($content, Arr::get($diff, 'files'));
 
             $this->info('Generated commit message:');
             $this->line('');
