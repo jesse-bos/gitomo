@@ -50,7 +50,7 @@ class OpenAiCommitMessagesCommand extends Command
         render('<div class="bg-green text-black p-1 mt-1">'.$commitMessage.'</div>');
 
         if ($this->copyToClipboard($commitMessage)) {
-            render('<div class="text-green mt-1">📋 Copied to clipboard!</div>');
+            render('<div class="text-yellow mt-1">📋 Copied to clipboard!</div>');
         }
 
         if ($type === 'unstaged') {
