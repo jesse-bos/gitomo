@@ -38,26 +38,25 @@ class OpenAiCommitMessagesCommand extends Command
         // Generate and display commit message
         try {
             $commitMessage = $this->generateCommitMessage($content, Arr::get($diff, 'files'));
-
-            render('<div class="text-green font-bold mt-1">✨ Generated commit message:</div>');
-            render('<div class="bg-green text-white p-1 mt-1">'.$commitMessage.'</div>');
-
-            // Copy to clipboard
-            if ($this->copyToClipboard($commitMessage)) {
-                render('<div class="text-green mt-1">📋 Copied to clipboard!</div>');
-            }
-
-            if ($type === 'unstaged') {
-                render('<div class="text-yellow mt-1">💡 Note: These are unstaged changes. Stage them with git add before committing.</div>');
-            }
-
-            return self::SUCCESS;
         } catch (\Exception $e) {
             render('<div class="text-red font-bold">❌ Failed to generate commit message:</div>');
             render('<div class="text-red ml-2">'.$e->getMessage().'</div>');
 
             return self::FAILURE;
         }
+
+        render('<div class="text-green font-bold mt-1">✨ Generated commit message:</div>');
+        render('<div class="bg-green text-white p-1 mt-1">'.$commitMessage.'</div>');
+
+        if ($this->copyToClipboard($commitMessage)) {
+            render('<div class="text-green mt-1">📋 Copied to clipboard!</div>');
+        }
+
+        if ($type === 'unstaged') {
+            render('<div class="text-yellow mt-1">💡 Note: These are unstaged changes. Stage them with git add or in the GUI before committing.</div>');
+        }
+
+        return self::SUCCESS;
     }
 
     /* -------------------- Helper methods -------------------- */
@@ -135,6 +134,7 @@ class OpenAiCommitMessagesCommand extends Command
 
     private function generateCommitMessage(string $diff, string $filesSummary): string
     {
+        // Get the configuration
         $conventional = config('openai-commit-messages.commit.conventional', true);
         $maxLength = config('openai-commit-messages.commit.max_length', 72);
 
