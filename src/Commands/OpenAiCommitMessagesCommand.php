@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OpenAICommitMessages\Commands;
+namespace OpenAiCommitMessages\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
@@ -11,7 +11,7 @@ use OpenAI\Laravel\Facades\OpenAI;
 
 use function Termwind\render;
 
-class OpenAICommitMessagesCommand extends Command
+class OpenAiCommitMessagesCommand extends Command
 {
     public $signature = 'openai:commit-message';
 

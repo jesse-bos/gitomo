@@ -40,13 +40,13 @@
     },
     "autoload": {
         "psr-4": {
-            "OpenAICommitMessages\\": "src/",
-            "OpenAICommitMessages\\Database\\Factories\\": "database/factories/"
+            "OpenAiCommitMessages\\": "src/",
+            "OpenAiCommitMessages\\Database\\Factories\\": "database/factories/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "OpenAICommitMessages\\Tests\\": "tests/",
+            "OpenAiCommitMessages\\Tests\\": "tests/",
             "Workbench\\App\\": "workbench/app/"
         }
     },
@@ -69,7 +69,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "OpenAICommitMessages\\OpenAICommitMessagesServiceProvider"
+                "OpenAiCommitMessages\\OpenAiCommitMessagesServiceProvider"
             ]
         }
     },

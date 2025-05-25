@@ -1,18 +1,18 @@
 <?php
 
-namespace OpenAICommitMessages;
+namespace OpenAiCommitMessages;
 
-use OpenAICommitMessages\Commands\OpenAICommitMessagesCommand;
+use OpenAiCommitMessages\Commands\OpenAiCommitMessagesCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
-class OpenAICommitMessagesServiceProvider extends PackageServiceProvider
+class OpenAiCommitMessagesServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
     {
         $package
             ->name('openai-commit-messages')
             ->hasConfigFile()
-            ->hasCommand(OpenAICommitMessagesCommand::class);
+            ->hasCommand(OpenAiCommitMessagesCommand::class);
     }
 }
