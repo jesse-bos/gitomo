@@ -32,11 +32,13 @@ class OpenAiCommitMessagesCommand extends Command
         }
 
         $type = Arr::get($diff, 'type');
-        
-        render('<div class="text-blue">🔍 Analyzing <span class="font-bold">'.ucfirst($type).'</span> changes...</div>');
+
+        render('<div class="text-blue">🔍 Analyzing <span class="font-bold">'.$type.'</span> changes...</div>');
+
+        $prompt = $this->buildPrompt($content, Arr::get($diff, 'files'));
 
         try {
-            $commitMessage = $this->generateCommitMessage($content, Arr::get($diff, 'files'));
+            $commitMessage = $this->generateCommitMessage($prompt);
         } catch (\Exception $e) {
             render('<div class="text-red font-bold">❌ Failed to generate commit message:</div>');
             render('<div class="text-red ml-2">'.$e->getMessage().'</div>');
@@ -44,7 +46,7 @@ class OpenAiCommitMessagesCommand extends Command
             return self::FAILURE;
         }
 
-        render('<div class="text-green font-bold mt-1">✨ Generated commit message:</div>');
+        render('<div class="text-green mt-1">✨ Generated commit message:</div>');
         render('<div class="bg-green text-white p-1 mt-1">'.$commitMessage.'</div>');
 
         if ($this->copyToClipboard($commitMessage)) {
@@ -127,20 +129,8 @@ class OpenAiCommitMessagesCommand extends Command
         ];
     }
 
-    protected function generateCommitMessage(string $diff, string $filesSummary): string
+    protected function generateCommitMessage(string $prompt): string
     {
-        $conventional = config('openai-commit-messages.commit.conventional', true);
-        $maxLength = config('openai-commit-messages.commit.max_length', 72);
-
-        $prompt = 'Generate a concise git commit message ';
-
-        if ($conventional) {
-            $prompt .= "following the Conventional Commits format (e.g., 'feat: add new feature' or 'fix: resolve issue') ";
-        }
-
-        $prompt .= "based on these changes. Keep it under {$maxLength} characters. Return only the commit message, no markdown formatting.";
-        $prompt .= "\n\nChanged files:\n$filesSummary\n\nDiff:\n$diff";
-
         $result = OpenAI::chat()->create([
             'model' => config('openai-commit-messages.openai.model', 'gpt-4o-mini'),
             'messages' => [
@@ -154,6 +144,23 @@ class OpenAiCommitMessagesCommand extends Command
         $commitMessage = trim($result->choices[0]->message->content ?? '');
 
         return $commitMessage;
+    }
+
+    protected function buildPrompt(string $diff, string $filesSummary): string
+    {
+        $conventional = config('openai-commit-messages.commit.conventional', true);
+        $maxLength = config('openai-commit-messages.commit.max_length', 72);
+
+        $prompt = 'Generate a concise git commit message ';
+
+        if ($conventional) {
+            $prompt .= "following the Conventional Commits format (e.g., 'feat: add new feature' or 'fix: resolve issue') ";
+        }
+
+        $prompt .= "based on these changes. Keep it under {$maxLength} characters. Return only the commit message, no markdown formatting.";
+        $prompt .= "\n\nChanged files:\n$filesSummary\n\nDiff:\n$diff";
+
+        return $prompt;
     }
 
     protected function copyToClipboard(string $text): bool
