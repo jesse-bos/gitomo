@@ -1,6 +1,6 @@
 <?php
 
-namespace Gitomo\Database\Factories;
+namespace OpenAiCommitMessages\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 

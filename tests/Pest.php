@@ -1,5 +1,5 @@
 <?php
 
-use Gitomo\Tests\TestCase;
+use OpenAiCommitMessages\Tests\TestCase;
 
 uses(TestCase::class)->in(__DIR__);

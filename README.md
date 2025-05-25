@@ -1,18 +1,18 @@
-# Gitomo - AI-Generated Git Commit Messages
+# OpenAI Commit Messages - AI-Generated Git Commit Messages
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/jesse-bos/gitomo.svg?style=flat-square)](https://packagist.org/packages/jesse-bos/gitomo)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/jesse-bos/gitomo/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/jesse-bos/gitomo/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/jesse-bos/gitomo/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/jesse-bos/gitomo/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/jesse-bos/gitomo.svg?style=flat-square)](https://packagist.org/packages/jesse-bos/gitomo)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/jesse-bos/openai-commit-messages.svg?style=flat-square)](https://packagist.org/packages/jesse-bos/openai-commit-messages)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/jesse-bos/openai-commit-messages/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/jesse-bos/openai-commit-messages/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/jesse-bos/openai-commit-messages/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/jesse-bos/openai-commit-messages/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
+[![Total Downloads](https://img.shields.io/packagist/dt/jesse-bos/openai-commit-messages.svg?style=flat-square)](https://packagist.org/packages/jesse-bos/openai-commit-messages)
 
-Gitomo is a simple Laravel package that generates commit messages using OpenAI based on your staged git changes. Just run one command and get a suggested commit message!
+OpenAI Commit Messages is a Laravel package that generates meaningful commit messages using OpenAI based on your staged git changes. Just run one command and get a suggested commit message!
 
 ## Installation
 
-### Step 1: Install Gitomo
+### Step 1: Install the Package
 
 ```bash
-composer require jesse-bos/gitomo
+composer require jesse-bos/openai-commit-messages
 ```
 
 *This automatically installs the required OpenAI Laravel package as well.*
@@ -32,12 +32,12 @@ php artisan vendor:publish --provider="OpenAI\Laravel\ServiceProvider"
 OPENAI_API_KEY=sk-your-actual-api-key-here
 ```
 
-### Step 4: Optionally configure Gitomo
+### Step 4: Optionally configure the Package
 
-If you want to customize the OpenAI model, publish Gitomo's config:
+If you want to customize the OpenAI model, publish the package config:
 
 ```bash
-php artisan vendor:publish --tag="gitomo-config"
+php artisan vendor:publish --tag="openai-commit-messages-config"
 ```
 
 ## Prerequisites
@@ -53,7 +53,7 @@ php artisan vendor:publish --tag="gitomo-config"
 After installation, verify that everything is configured correctly:
 
 ```bash
-php artisan gitomo --check
+php artisan openai:commit --check
 ```
 
 This will check:
@@ -67,18 +67,18 @@ This will check:
 After making changes in your git repository, simply run:
 
 ```bash
-php artisan gitomo
+php artisan openai:commit
 ```
 
-Gitomo will automatically:
+The package will automatically:
 1. **First check for staged changes** (files added with `git add` or staged via Tower, GitHub Desktop, etc.)
 2. **If no staged changes found**, it will analyze unstaged changes
-3. **Generate a commit message** based on the found changes
+3. **Generate a commit message** based on the found changes using OpenAI
 
 The tool works seamlessly with any git workflow:
-- **Command line**: `git add .` then `php artisan gitomo`
-- **Tower/GitHub Desktop**: Stage files in the GUI, then run `php artisan gitomo`
-- **Quick preview**: Just run `php artisan gitomo` to see a message for unstaged changes
+- **Command line**: `git add .` then `php artisan openai:commit`
+- **Tower/GitHub Desktop**: Stage files in the GUI, then run `php artisan openai:commit`
+- **Quick preview**: Just run `php artisan openai:commit` to see a message for unstaged changes
 
 After getting the suggested message, create your commit:
 
@@ -91,7 +91,7 @@ git commit -m "the suggested message"
 You can configure which OpenAI model to use by setting an environment variable:
 
 ```
-GITOMO_OPENAI_MODEL=gpt-4o
+OPENAI_COMMIT_MESSAGES_MODEL=gpt-4o
 ```
 
 Or by publishing and editing the config file:
@@ -99,7 +99,7 @@ Or by publishing and editing the config file:
 ```php
 return [
     'openai' => [
-        'model' => env('GITOMO_OPENAI_MODEL', 'gpt-4o-mini'),
+        'model' => env('OPENAI_COMMIT_MESSAGES_MODEL', 'gpt-4o-mini'),
     ],
 ];
 ```

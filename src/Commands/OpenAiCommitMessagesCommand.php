@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Gitomo\Commands;
+namespace OpenAiCommitMessages\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
@@ -11,11 +11,11 @@ use OpenAI\Laravel\Facades\OpenAI;
 
 use function Termwind\render;
 
-class GitomoCommand extends Command
+class OpenAiCommitMessagesCommand extends Command
 {
-    public $signature = 'gitomo';
+    public $signature = 'openai:commit';
 
-    public $description = 'Generate an AI-generated commit message based on staged changes';
+    public $description = 'Generate an AI-generated commit message based on staged changes using OpenAI';
 
     public function handle(): int
     {
@@ -135,8 +135,8 @@ class GitomoCommand extends Command
 
     private function generateCommitMessage(string $diff, string $filesSummary): string
     {
-        $conventional = config('gitomo.commit.conventional', true);
-        $maxLength = config('gitomo.commit.max_length', 72);
+        $conventional = config('openai-commit-messages.commit.conventional', true);
+        $maxLength = config('openai-commit-messages.commit.max_length', 72);
 
         // Build the prompt for OpenAI
         $prompt = 'Generate a concise git commit message ';
@@ -150,7 +150,7 @@ class GitomoCommand extends Command
 
         // Request the completion from OpenAI
         $result = OpenAI::chat()->create([
-            'model' => config('gitomo.openai.model', 'gpt-4o-mini'),
+            'model' => config('openai-commit-messages.openai.model', 'gpt-4o-mini'),
             'messages' => [
                 ['role' => 'system', 'content' => 'You are a helpful assistant that generates concise, meaningful git commit messages based on code changes. Return only the commit message without any markdown formatting or code blocks.'],
                 ['role' => 'user', 'content' => $prompt],
