@@ -20,7 +20,11 @@ it('succeeds with valid configuration and staged changes', function () {
         'git rev-parse --is-inside-work-tree' => Process::result(output: 'true'),
         'git diff --staged' => Process::result(output: "diff --git a/test.php b/test.php\n+new feature"),
         'git diff --staged --name-status' => Process::result(output: "M\ttest.php"),
-        'pbcopy' => Process::result(),
+        // Mock clipboard commands for different OS
+        'pbcopy' => Process::result(), // macOS
+        'xclip -selection clipboard' => Process::result(), // Linux
+        'xsel --clipboard --input' => Process::result(), // Linux fallback
+        'clip' => Process::result(), // Windows
     ]);
 
     OpenAI::fake([
