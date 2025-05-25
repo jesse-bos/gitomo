@@ -12,7 +12,7 @@ OpenAI Commit Messages is a Laravel package that generates meaningful commit mes
 ### Step 1: Install the Package
 
 ```bash
-composer require jesse-bos/openai-commit-messages
+composer require jesse-bos/openai-commit-messages --dev
 ```
 
 *This automatically installs the required OpenAI Laravel package as well.*
