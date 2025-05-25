@@ -15,7 +15,7 @@ class OpenAiCommitMessagesCommand extends Command
 {
     public $signature = 'openai:commit-message';
 
-    public $description = 'Generate an AI-generated commit message based on staged changes using OpenAI';
+    public $description = 'Generate an AI-generated commit message based on staged or unstaged changes using OpenAI';
 
     public function handle(): int
     {
