@@ -19,13 +19,11 @@ class OpenAiCommitMessagesCommand extends Command
 
     public function handle(): int
     {
-        // Always run a quick config check first
         if (! $this->configCheck()) {
             return self::FAILURE;
         }
 
         $diff = $this->getDiff();
-        $type = Arr::get($diff, 'type');
 
         if (! $content = Arr::get($diff, 'content')) {
             render('<div class="text-yellow">⚠ No changes found. Make some changes to your files first.</div>');
@@ -33,9 +31,10 @@ class OpenAiCommitMessagesCommand extends Command
             return self::FAILURE;
         }
 
-        render('<div class="text-blue">🔍 Analyzing <span class="font-bold">'.$type.'</span> changes...</div>');
+        $type = Arr::get($diff, 'type');
+        
+        render('<div class="text-blue">🔍 Analyzing <span class="font-bold">'.ucfirst($type).'</span> changes...</div>');
 
-        // Generate and display commit message
         try {
             $commitMessage = $this->generateCommitMessage($content, Arr::get($diff, 'files'));
         } catch (\Exception $e) {
@@ -65,7 +64,6 @@ class OpenAiCommitMessagesCommand extends Command
     {
         $hasErrors = false;
 
-        // Check if OpenAI config exists
         if (! config('openai')) {
             render('<div class="text-red font-bold">✗ OpenAI configuration not found</div>');
             render('<div class="text-gray ml-2">Run: php artisan vendor:publish --provider="OpenAI\Laravel\ServiceProvider"</div>');
@@ -78,7 +76,6 @@ class OpenAiCommitMessagesCommand extends Command
             $hasErrors = true;
         }
 
-        // Check git repository
         if (! $this->isGitRepository()) {
             render('<div class="text-red font-bold">✗ Not in a git repository</div>');
             $hasErrors = true;
@@ -87,7 +84,7 @@ class OpenAiCommitMessagesCommand extends Command
         return ! $hasErrors;
     }
 
-    private function isGitRepository(): bool
+    protected function isGitRepository(): bool
     {
         $result = Process::run('git rev-parse --is-inside-work-tree');
 
@@ -97,9 +94,8 @@ class OpenAiCommitMessagesCommand extends Command
     /**
      * @return array<string, string>
      */
-    private function getDiff(): array
+    protected function getDiff(): array
     {
-        // First try staged changes
         $stagedProcess = Process::run('git diff --staged');
 
         if ($stagedProcess->successful() && ! empty(trim($stagedProcess->output()))) {
@@ -112,7 +108,6 @@ class OpenAiCommitMessagesCommand extends Command
             ];
         }
 
-        // If no staged changes, try unstaged changes
         $unstagedProcess = Process::run('git diff');
 
         if ($unstagedProcess->successful() && ! empty(trim($unstagedProcess->output()))) {
@@ -132,13 +127,11 @@ class OpenAiCommitMessagesCommand extends Command
         ];
     }
 
-    private function generateCommitMessage(string $diff, string $filesSummary): string
+    protected function generateCommitMessage(string $diff, string $filesSummary): string
     {
-        // Get the configuration
         $conventional = config('openai-commit-messages.commit.conventional', true);
         $maxLength = config('openai-commit-messages.commit.max_length', 72);
 
-        // Build the prompt for OpenAI
         $prompt = 'Generate a concise git commit message ';
 
         if ($conventional) {
@@ -148,7 +141,6 @@ class OpenAiCommitMessagesCommand extends Command
         $prompt .= "based on these changes. Keep it under {$maxLength} characters. Return only the commit message, no markdown formatting.";
         $prompt .= "\n\nChanged files:\n$filesSummary\n\nDiff:\n$diff";
 
-        // Request the completion from OpenAI
         $result = OpenAI::chat()->create([
             'model' => config('openai-commit-messages.openai.model', 'gpt-4o-mini'),
             'messages' => [
@@ -164,9 +156,8 @@ class OpenAiCommitMessagesCommand extends Command
         return $commitMessage;
     }
 
-    private function copyToClipboard(string $text): bool
+    protected function copyToClipboard(string $text): bool
     {
-        // Detect operating system and use appropriate clipboard command
         $os = PHP_OS_FAMILY;
 
         try {
