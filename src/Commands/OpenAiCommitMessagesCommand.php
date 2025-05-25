@@ -9,8 +9,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Process;
 use OpenAI\Laravel\Facades\OpenAI;
 
-use function Termwind\render;
-
 class OpenAiCommitMessagesCommand extends Command
 {
     public $signature = 'openai:commit-message';
@@ -26,35 +24,36 @@ class OpenAiCommitMessagesCommand extends Command
         $diff = $this->getDiff();
 
         if (! $content = Arr::get($diff, 'content')) {
-            render('<div class="text-yellow">⚠ No changes found. Make some changes to your files first.</div>');
+            $this->warn('⚠ No changes found. Make some changes to your files first.');
 
             return self::FAILURE;
         }
 
         $type = Arr::get($diff, 'type');
 
-        render('<div class="text-yellow">🔍 Analyzing <span class="font-bold">'.$type.'</span> changes...</div>');
+        $this->info("🔍 Analyzing {$type} changes...");
 
         $prompt = $this->buildPrompt($content, Arr::get($diff, 'files'));
 
         try {
             $commitMessage = $this->generateCommitMessage($prompt);
         } catch (\Exception $e) {
-            render('<div class="text-red font-bold">❌ Failed to generate commit message:</div>');
-            render('<div class="text-red ml-2">'.$e->getMessage().'</div>');
+            $this->error('❌ Failed to generate commit message:');
+            $this->line('  '.$e->getMessage());
 
             return self::FAILURE;
         }
 
-        render('<div class="text-yellow mt-1">✨ Generated commit message:</div>');
-        render('<div class="bg-green text-black p-1 mt-1">'.$commitMessage.'</div>');
+        $this->newLine();
+        $this->info('✨ Generated commit message:');
+        $this->line('  '.$commitMessage);
 
         if ($this->copyToClipboard($commitMessage)) {
-            render('<div class="text-yellow mt-1">📋 Copied to clipboard!</div>');
+            $this->info('📋 Copied to clipboard!');
         }
 
         if ($type === 'unstaged') {
-            render('<div class="text-yellow mt-1">💡 Note: These are unstaged changes. Stage them with git add or in the GUI before committing.</div>');
+            $this->comment('💡 Note: These are unstaged changes. Stage them with git add or in the GUI before committing.');
         }
 
         return self::SUCCESS;
@@ -67,19 +66,19 @@ class OpenAiCommitMessagesCommand extends Command
         $hasErrors = false;
 
         if (! config('openai')) {
-            render('<div class="text-red font-bold">✗ OpenAI configuration not found</div>');
-            render('<div class="text-gray ml-2">Run: php artisan vendor:publish --provider="OpenAI\Laravel\ServiceProvider"</div>');
+            $this->error('✗ OpenAI configuration not found');
+            $this->line('  Run: php artisan vendor:publish --provider="OpenAI\Laravel\ServiceProvider"');
             $hasErrors = true;
         }
 
         if (! config('openai.api_key')) {
-            render('<div class="text-red font-bold">✗ OpenAI API key not found</div>');
-            render('<div class="text-gray ml-2">Add OPENAI_API_KEY=sk-your-key to your .env file</div>');
+            $this->error('✗ OpenAI API key not found');
+            $this->line('  Add OPENAI_API_KEY=sk-your-key to your .env file');
             $hasErrors = true;
         }
 
         if (! $this->isGitRepository()) {
-            render('<div class="text-red font-bold">✗ Not in a git repository</div>');
+            $this->error('✗ Not in a git repository');
             $hasErrors = true;
         }
 
