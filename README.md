@@ -5,7 +5,7 @@
 [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/jesse-bos/openai-commit-messages/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/jesse-bos/openai-commit-messages/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/jesse-bos/openai-commit-messages.svg?style=flat-square)](https://packagist.org/packages/jesse-bos/openai-commit-messages)
 
-OpenAI Commit Messages is a Laravel package that generates meaningful commit messages using OpenAI based on your staged git changes. Just run one command and get a suggested commit message!
+OpenAI Commit Messages is a Laravel package that generates meaningful commit messages using OpenAI based on your git changes. It first checks for staged changes, and if none are found, analyzes unstaged changes. Just run one command and get a suggested commit message!
 
 ## Installation
 
@@ -50,13 +50,7 @@ php artisan vendor:publish --tag="openai-commit-messages-config"
 
 ### Verify your setup (recommended first time)
 
-After installation, verify that everything is configured correctly:
-
-```bash
-php artisan openai:commit --check
-```
-
-This will check:
+After installation, verify that everything is configured correctly by running the command. The package will automatically check:
 - ✓ OpenAI API key is set
 - ✓ OpenAI configuration is published  
 - ✓ You're in a git repository
@@ -67,7 +61,7 @@ This will check:
 After making changes in your git repository, simply run:
 
 ```bash
-php artisan openai:commit
+php artisan openai:commit-message
 ```
 
 The package will automatically:
@@ -76,9 +70,9 @@ The package will automatically:
 3. **Generate a commit message** based on the found changes using OpenAI
 
 The tool works seamlessly with any git workflow:
-- **Command line**: `git add .` then `php artisan openai:commit`
-- **Tower/GitHub Desktop**: Stage files in the GUI, then run `php artisan openai:commit`
-- **Quick preview**: Just run `php artisan openai:commit` to see a message for unstaged changes
+- **Command line**: `git add .` then `php artisan openai:commit-message`
+- **Tower/GitHub Desktop**: Stage files in the GUI, then run `php artisan openai:commit-message`
+- **Quick preview**: Just run `php artisan openai:commit-message` to see a message for unstaged changes
 
 After getting the suggested message, create your commit:
 
@@ -88,20 +82,37 @@ git commit -m "the suggested message"
 
 ## Configuration
 
-You can configure which OpenAI model to use by setting an environment variable:
+You can configure the package by publishing and editing the config file:
 
-```
-OPENAI_COMMIT_MESSAGES_MODEL=gpt-4o
+```bash
+php artisan vendor:publish --tag="openai-commit-messages-config"
 ```
 
-Or by publishing and editing the config file:
+### Available Configuration Options
 
 ```php
 return [
     'openai' => [
+        // OpenAI model to use for generating commit messages
         'model' => env('OPENAI_COMMIT_MESSAGES_MODEL', 'gpt-4o-mini'),
     ],
+
+    'commit' => [
+        // Maximum length for the commit message
+        'max_length' => 72,
+
+        // Use conventional commit format (e.g. feat: message, fix: bug)
+        'conventional' => true,
+    ],
 ];
+```
+
+### Environment Variables
+
+You can also configure the OpenAI model using an environment variable:
+
+```env
+OPENAI_COMMIT_MESSAGES_MODEL=gpt-4o
 ```
 
 ## Testing
