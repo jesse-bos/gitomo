@@ -33,7 +33,7 @@ class OpenAiCommitMessagesCommand extends Command
 
         $type = Arr::get($diff, 'type');
 
-        render('<div class="text-blue">🔍 Analyzing <span class="font-bold">'.$type.'</span> changes...</div>');
+        render('<div class="text-yellow">🔍 Analyzing <span class="font-bold">'.$type.'</span> changes...</div>');
 
         $prompt = $this->buildPrompt($content, Arr::get($diff, 'files'));
 
@@ -47,7 +47,7 @@ class OpenAiCommitMessagesCommand extends Command
         }
 
         render('<div class="text-green mt-1">✨ Generated commit message:</div>');
-        render('<div class="bg-green text-white p-1 mt-1">'.$commitMessage.'</div>');
+        render('<div class="bg-green text-black p-1 mt-1">'.$commitMessage.'</div>');
 
         if ($this->copyToClipboard($commitMessage)) {
             render('<div class="text-green mt-1">📋 Copied to clipboard!</div>');
