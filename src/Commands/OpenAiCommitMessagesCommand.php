@@ -46,13 +46,15 @@ class OpenAiCommitMessagesCommand extends Command
 
         $this->newLine();
         $this->info('✨ Generated commit message:');
-        $this->line('  '.$commitMessage);
+        $this->line($commitMessage);
 
         if ($this->copyToClipboard($commitMessage)) {
+            $this->newLine();
             $this->info('📋 Copied to clipboard!');
         }
 
         if ($type === 'unstaged') {
+            $this->newLine();
             $this->comment('💡 Note: These are unstaged changes. Stage them with git add or in the GUI before committing.');
         }
 
