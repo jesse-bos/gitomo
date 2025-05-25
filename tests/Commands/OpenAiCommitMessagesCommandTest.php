@@ -20,11 +20,6 @@ it('succeeds with valid configuration and staged changes', function () {
         'git rev-parse --is-inside-work-tree' => Process::result(output: 'true'),
         'git diff --staged' => Process::result(output: "diff --git a/test.php b/test.php\n+new feature"),
         'git diff --staged --name-status' => Process::result(output: "M\ttest.php"),
-        // Mock clipboard commands for different OS
-        'pbcopy' => Process::result(), // macOS
-        'xclip -selection clipboard' => Process::result(), // Linux
-        'xsel --clipboard --input' => Process::result(), // Linux fallback
-        'clip' => Process::result(), // Windows
     ]);
 
     OpenAI::fake([
@@ -39,7 +34,6 @@ it('succeeds with valid configuration and staged changes', function () {
         ->expectsOutputToContain('🔍 Analyzing staged changes...')
         ->expectsOutputToContain('✨ Generated commit message:')
         ->expectsOutputToContain('feat: add new feature')
-        ->expectsOutputToContain('📋 Copied to clipboard!')
         ->assertExitCode(0);
 });
 
@@ -49,7 +43,6 @@ it('succeeds with valid configuration and unstaged changes', function () {
         'git diff --staged' => Process::result(output: ''),
         'git diff' => Process::result(output: "diff --git a/test.php b/test.php\n+bug fix"),
         'git diff --name-status' => Process::result(output: "M\ttest.php"),
-        'pbcopy' => Process::result(),
     ]);
 
     OpenAI::fake([
@@ -108,36 +101,12 @@ it('fails when no changes are found', function () {
         ->assertExitCode(1);
 });
 
-it('succeeds even when clipboard copy fails', function () {
-    Process::fake([
-        'git rev-parse --is-inside-work-tree' => Process::result(output: 'true'),
-        'git diff --staged' => Process::result(output: "diff --git a/test.php b/test.php\n+feature"),
-        'git diff --staged --name-status' => Process::result(output: "M\ttest.php"),
-        'pbcopy' => Process::result(exitCode: 1), // Clipboard fails but command should still succeed
-    ]);
-
-    OpenAI::fake([
-        CreateResponse::fake([
-            'choices' => [
-                ['message' => ['content' => 'feat: add feature']],
-            ],
-        ]),
-    ]);
-
-    $this->artisan(OpenAiCommitMessagesCommand::class)
-        ->expectsOutputToContain('✨ Generated commit message:')
-        ->expectsOutputToContain('feat: add feature')
-        ->doesntExpectOutputToContain('📋 Copied to clipboard!')
-        ->assertExitCode(0);
-});
-
 it('prioritizes staged over unstaged changes', function () {
     Process::fake([
         'git rev-parse --is-inside-work-tree' => Process::result(output: 'true'),
         'git diff --staged' => Process::result(output: "diff --git a/staged.php b/staged.php\n+staged"),
         'git diff --staged --name-status' => Process::result(output: "M\tstaged.php"),
         'git diff' => Process::result(output: "diff --git a/unstaged.php b/unstaged.php\n+unstaged"),
-        'pbcopy' => Process::result(),
     ]);
 
     OpenAI::fake([
@@ -162,7 +131,6 @@ it('uses custom model from configuration', function () {
         'git rev-parse --is-inside-work-tree' => Process::result(output: 'true'),
         'git diff --staged' => Process::result(output: "diff --git a/test.php b/test.php\n+change"),
         'git diff --staged --name-status' => Process::result(output: "M\ttest.php"),
-        'pbcopy' => Process::result(),
     ]);
 
     OpenAI::fake([
