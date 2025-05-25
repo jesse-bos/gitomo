@@ -32,7 +32,7 @@ class OpenAiCommitMessagesCommand extends Command
         }
 
         $type = Arr::get($diff, 'type');
-        
+
         render('<div class="text-blue">🔍 Analyzing <span class="font-bold">'.ucfirst($type).'</span> changes...</div>');
 
         try {
