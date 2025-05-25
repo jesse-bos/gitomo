@@ -46,7 +46,7 @@ class OpenAiCommitMessagesCommand extends Command
             return self::FAILURE;
         }
 
-        render('<div class="text-green mt-1">✨ Generated commit message:</div>');
+        render('<div class="text-yellow mt-1">✨ Generated commit message:</div>');
         render('<div class="bg-green text-black p-1 mt-1">'.$commitMessage.'</div>');
 
         if ($this->copyToClipboard($commitMessage)) {
