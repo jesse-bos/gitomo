@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenAiCommitMessages\Database\Factories;
+namespace OpenAICommitMessages\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 

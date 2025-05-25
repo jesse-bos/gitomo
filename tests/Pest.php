@@ -1,5 +1,5 @@
 <?php
 
-use OpenAiCommitMessages\Tests\TestCase;
+use OpenAICommitMessages\Tests\TestCase;
 
 uses(TestCase::class)->in(__DIR__);

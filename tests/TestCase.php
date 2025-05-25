@@ -1,9 +1,9 @@
 <?php
 
-namespace OpenAiCommitMessages\Tests;
+namespace OpenAICommitMessages\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use OpenAiCommitMessages\OpenAiCommitMessagesServiceProvider;
+use OpenAICommitMessages\OpenAICommitMessagesServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
@@ -13,14 +13,14 @@ class TestCase extends Orchestra
         parent::setUp();
 
         Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'OpenAiCommitMessages\\Database\\Factories\\'.class_basename($modelName).'Factory'
+            fn (string $modelName) => 'OpenAICommitMessages\\Database\\Factories\\'.class_basename($modelName).'Factory'
         );
     }
 
     protected function getPackageProviders($app)
     {
         return [
-            OpenAiCommitMessagesServiceProvider::class,
+            OpenAICommitMessagesServiceProvider::class,
         ];
     }
 
@@ -29,9 +29,8 @@ class TestCase extends Orchestra
         config()->set('database.default', 'testing');
 
         /*
-         foreach (\Illuminate\Support\Facades\File::allFiles(__DIR__ . '/database/migrations') as $migration) {
-            (include $migration->getRealPath())->up();
-         }
-         */
+        $migration = include __DIR__.'/../database/migrations/create_openai-commit-messages_table.php.stub';
+        $migration->up();
+        */
     }
 }

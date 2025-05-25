@@ -1,5 +1,5 @@
 <?php
 
-namespace OpenAiCommitMessages;
+namespace OpenAICommitMessages;
 
-class OpenAiCommitMessages {}
+class OpenAICommitMessages {}
