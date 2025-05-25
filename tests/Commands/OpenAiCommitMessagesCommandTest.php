@@ -16,6 +16,7 @@ beforeEach(function () {
 });
 
 it('succeeds with valid configuration and staged changes', function () {
+    // Arrange
     Process::fake([
         'git rev-parse --is-inside-work-tree' => Process::result(output: 'true'),
         'git diff --staged' => Process::result(output: "diff --git a/test.php b/test.php\n+new feature"),
@@ -30,6 +31,7 @@ it('succeeds with valid configuration and staged changes', function () {
         ]),
     ]);
 
+    // Act & Assert
     $this->artisan(OpenAiCommitMessagesCommand::class)
         ->expectsOutputToContain('🔍 Analyzing staged changes...')
         ->expectsOutputToContain('✨ Generated commit message:')
@@ -38,6 +40,7 @@ it('succeeds with valid configuration and staged changes', function () {
 });
 
 it('succeeds with valid configuration and unstaged changes', function () {
+    // Arrange
     Process::fake([
         'git rev-parse --is-inside-work-tree' => Process::result(output: 'true'),
         'git diff --staged' => Process::result(output: ''),
@@ -53,6 +56,7 @@ it('succeeds with valid configuration and unstaged changes', function () {
         ]),
     ]);
 
+    // Act & Assert
     $this->artisan(OpenAiCommitMessagesCommand::class)
         ->expectsOutputToContain('🔍 Analyzing unstaged changes...')
         ->expectsOutputToContain('✨ Generated commit message:')
@@ -62,8 +66,10 @@ it('succeeds with valid configuration and unstaged changes', function () {
 });
 
 it('fails when no OpenAI API key is configured', function () {
+    // Arrange
     Config::set('openai.api_key', null);
 
+    // Act & Assert
     $this->artisan(OpenAiCommitMessagesCommand::class)
         ->expectsOutputToContain('✗ OpenAI API key not found')
         ->expectsOutputToContain('Add OPENAI_API_KEY=')
@@ -71,8 +77,10 @@ it('fails when no OpenAI API key is configured', function () {
 });
 
 it('fails when OpenAI configuration is missing', function () {
+    // Arrange
     Config::set('openai', null);
 
+    // Act & Assert
     $this->artisan(OpenAiCommitMessagesCommand::class)
         ->expectsOutputToContain('✗ OpenAI configuration not found')
         ->expectsOutputToContain('php artisan vendor:publish')
@@ -80,28 +88,33 @@ it('fails when OpenAI configuration is missing', function () {
 });
 
 it('fails when not in a git repository', function () {
+    // Arrange
     Process::fake([
         'git rev-parse --is-inside-work-tree' => Process::result(exitCode: 1),
     ]);
 
+    // Act & Assert
     $this->artisan(OpenAiCommitMessagesCommand::class)
         ->expectsOutputToContain('✗ Not in a git repository')
         ->assertExitCode(1);
 });
 
 it('fails when no changes are found', function () {
+    // Arrange
     Process::fake([
         'git rev-parse --is-inside-work-tree' => Process::result(output: 'true'),
         'git diff --staged' => Process::result(output: ''),
         'git diff' => Process::result(output: ''),
     ]);
 
+    // Act & Assert
     $this->artisan(OpenAiCommitMessagesCommand::class)
         ->expectsOutputToContain('⚠ No changes found')
         ->assertExitCode(1);
 });
 
 it('prioritizes staged over unstaged changes', function () {
+    // Arrange
     Process::fake([
         'git rev-parse --is-inside-work-tree' => Process::result(output: 'true'),
         'git diff --staged' => Process::result(output: "diff --git a/staged.php b/staged.php\n+staged"),
@@ -117,6 +130,7 @@ it('prioritizes staged over unstaged changes', function () {
         ]),
     ]);
 
+    // Act & Assert
     $this->artisan(OpenAiCommitMessagesCommand::class)
         ->expectsOutputToContain('staged changes')
         ->doesntExpectOutputToContain('unstaged changes')
@@ -125,6 +139,7 @@ it('prioritizes staged over unstaged changes', function () {
 });
 
 it('uses custom model from configuration', function () {
+    // Arrange
     Config::set('openai-commit-messages.openai.model', 'gpt-4');
 
     Process::fake([
@@ -141,6 +156,7 @@ it('uses custom model from configuration', function () {
         ]),
     ]);
 
+    // Act & Assert
     $this->artisan(OpenAiCommitMessagesCommand::class)
         ->expectsOutputToContain('✨ Generated commit message:')
         ->expectsOutputToContain('feat: custom model response')
